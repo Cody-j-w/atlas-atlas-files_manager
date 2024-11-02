@@ -19,7 +19,7 @@ class DBClient {
         this.client.on('open', () => {
             console.log('connected');
             this.connected = true;
-            this.db = this.client.db(database);
+            this.db = this.client.db(this.database);
         });
     }
 
@@ -35,8 +35,8 @@ class DBClient {
     async nbUsers() {
         try {
             const collection = this.db.collection('users');
-            const result = await collection.find({}).toArray();
-            return result;
+            const response = await collection.find({}).toArray();
+            return response;
         } catch (err) {
             throw err;
         }
