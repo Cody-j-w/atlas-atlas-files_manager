@@ -1,57 +1,58 @@
-import MongoClient from "mongodb/lib/mongo_client";
+const { MongoClient } = require("mongodb");
+require("dotenv").config();
 
 console.log(process.env.CONNECTION_URI);
 
 class DBClient {
-    host='localhost';
-    port=27017;
-    database='files_manager';
-    client = null;
-    connected = false;
-    uri = process.env.CONNECTION_URI;
+  constructor(host, port, database) {
+    this.host = host || "localhost";
+    this.port = port || 27017;
+    this.database = database || "files_manager";
+    this.client = null;
+    this.connected = false;
+    this.uri = process.env.CONNECTION_URI;
 
-    constructor(host, port, database) {
-        if (host) this.host = host;
-        if (port) this.port = port;
-        if (database) this.database = database;
-        this.client = new MongoClient(this.uri);
-        this.client.connect();
-        this.client.on('open', () => {
-            console.log('connected');
-            this.connected = true;
-            this.db = this.client.db(this.database);
-        });
-    }
+    this.client = new MongoClient(this.uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-    isAlive() {
-        if (this.connected) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+    this.client.connect((err) => {
+      if (err) {
+        console.error("MongoDB connection error:", err);
+      } else {
+        console.log("Connected to MongoDB");
+        this.connected = true;
+        this.db = this.client.db(this.database);
+      }
+    });
+  }
 
-    async nbUsers() {
-        try {
-            const collection = this.db.collection('users');
-            const response = await collection.find({}).toArray();
-            return response;
-        } catch (err) {
-            throw err;
-        }
-    }
-    async nbFiles() {
-        try {
-            const collection = this.db.collection('files');
-            const result = await collection.find({}).toArray();
-            return result;
-        } catch (err) {
-            throw err;
-        }
-    }
+  isAlive() {
+    return this.connected;
+  }
 
+  async nbUsers() {
+    try {
+      const collection = this.db.collection("users"); // Access the users collection
+      const count = await collection.countDocuments(); // Get the count of users
+      return count; // Return the count of users
+    } catch (err) {
+      throw err; // Propagate the error
+    }
+  }
+
+  async nbFiles() {
+    try {
+      const collection = this.db.collection("files"); // Access the files collection
+      const count = await collection.countDocuments(); // Get the count of files
+      return count; // Return the count of files
+    } catch (err) {
+      throw err; // Propagate the error
+    }
+  }
 }
 
 const dbClient = new DBClient();
+
 module.exports = dbClient;
