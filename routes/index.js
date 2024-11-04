@@ -3,6 +3,7 @@ const router = express.Router();
 const AppController = require('../controllers/AppController.js');
 const UsersController = require('../controllers/UsersController.js');
 const AuthController = require('../controllers/AuthController.js');
+const FilesController = require('../controllers/FilesController.js');
 
 // Define routes and their controller methods
 router.get('/status', AppController.getStatus);
