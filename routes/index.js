@@ -12,4 +12,5 @@ router.get('/connect', AuthController.getConnect);
 
 router.post('/users', UsersController.postNew);
 
+router.post('/files', FilesController.postUpload);
 module.exports = router;
