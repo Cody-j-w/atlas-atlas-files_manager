@@ -1,14 +1,19 @@
-import { createClient } from "redis";
-console.log(`redis version is: ${require('redis/package.json').version}`);
+
+const redis = require("redis");
 
 class RedisClient {
-
     constructor() {
-        this.client = new createClient();
+        this.connected = false;
+        this.client = redis.createClient();
+
+        // Handle connection errors
         this.client.on('error', (err) => {
-            console.log(err);
+            console.log('Redis Client Error:', err);
         });
+
+        // Handle successful connection
         this.client.on('connect', () => {
+
             console.log("connected");
         })
     }
