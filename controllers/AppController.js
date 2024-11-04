@@ -1,6 +1,5 @@
 const redisUtil = require("../utils/redis");
 const dbUtil = require("../utils/db");
-const Collection = require("mongodb/lib/collection");
 
 class AppController {
   static async getStatus(req, res) {
