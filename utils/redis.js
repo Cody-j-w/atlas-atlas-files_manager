@@ -20,6 +20,19 @@ class RedisClient {
     isAlive() {
         return this.connected;
     }
+
+    async get(key) {
+        return await this.client.get(key);
+    }
+
+    async set(key, value, duration) {
+        await this.client.set(key, value);
+        await this.client.expireat(key, duration);
+    }
+
+    async del(key) {
+        await this.client.del(key);
+    }
 }
 
 const redisClient = new RedisClient();
