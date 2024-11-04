@@ -20,6 +20,14 @@ class FilesController {
         if (!type || typeValidation === false) {
             res.status(400).send('Missing type');
         }
+        if (!data && type !== 'folder') {
+            res.status(400).send('Missing data');
+        }
+        let parentId = 0;
+        parentId = req.body.parentId;
+        // if (parentId !== 0) {
+            
+        // }
     }
 }
 
