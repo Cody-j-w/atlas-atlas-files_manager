@@ -1,3 +1,7 @@
+const { v4: uuidv4 } = require('uuid');
+const DBClient = require('../utils/db');
+const redisClient = require('../utils/redis.js');
+
 class AuthController {
   static async getConnect(req, res) {
     const authHeader = req.headers["authorization"];
@@ -16,11 +20,16 @@ class AuthController {
     const [email, password] = decoded.split(":");
 
     if (!email) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(401).json({ error: "User not found" });
+    } else {
+        const token = uuidv4();
+        const redisKey = `auth_${token}`;
+        const user = await DBClient.findUser(email);
+        const userId = user._id;
+        console.log(user);
+        await redisClient.set(redisKey, userId.toString(), 86400);
+        res.status(200).json({ token });
     }
-
-    // Return or use the email and password as needed
-    res.json({ email, password });
   }
 }
 

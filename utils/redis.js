@@ -5,8 +5,14 @@ class RedisClient {
         this.client = redis.createClient();
 
         this.client.on('error', (err) => {
-            console.error('Redis error:', err);
+            console.log('Redis Client Error:', err);
         });
+
+        // Handle successful connection
+        this.client.on('connect', () => {
+
+            console.log("connected");
+        })
     }
 
     isAlive() {
@@ -15,36 +21,34 @@ class RedisClient {
 
     async get(key) {
         return new Promise((resolve, reject) => {
-            this.client.get(key, (err, value) => {
+            this.client.get(key, (err, res) => {
                 if (err) {
-                    reject(err);
-                } else {
-                    resolve(value);
+                    return reject(err);
                 }
-            });
-        });
+                return resolve(res);
+            })
+        })
     }
 
     async set(key, value, duration) {
         return new Promise((resolve, reject) => {
-            this.client.setex(key, duration, value, (err) => {
+            this.client.set(key, value, 'EX', duration, (err) => {
                 if (err) {
-                    reject(err);
-                } else {
-                    resolve(true);
+                    return reject(err);
                 }
-            });
-        });
+                return resolve();
+            })
+        })
     }
 
     async del(key) {
         return new Promise((resolve, reject) => {
             this.client.del(key, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(true);
-                }
+
+              if (err) {
+                return reject(err);
+              }
+              return resolve();
             });
         });
     }
