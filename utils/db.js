@@ -34,21 +34,20 @@ class DBClient {
 
   async nbUsers() {
     try {
-      const collection = this.db.collection("users"); // Access the users collection
-      const count = await collection.countDocuments(); // Get the count of users
-      return count; // Return the count of users
+      const collection = this.db.collection("users");
+      const count = await collection.countDocuments();
     } catch (err) {
-      throw err; // Propagate the error
+      throw err;
     }
   }
 
   async nbFiles() {
     try {
-      const collection = this.db.collection("files"); // Access the files collection
-      const count = await collection.countDocuments(); // Get the count of files
-      return count; // Return the count of files
+      const collection = this.db.collection("files");
+      const count = await collection.countDocuments();
+      return count;
     } catch (err) {
-      throw err; // Propagate the error
+      throw err;
     }
   }
 }
