@@ -60,6 +60,16 @@ class DBClient {
       throw err;
     }
   }
+
+  async createUser(user) {
+    try {
+      const userCollection = this.db.collection("users");
+      const result = await userCollection.insertOne(user);
+      return result;
+    } catch (err) {
+        throw err;
+    }
+  }
 }
 
 const dbClient = new DBClient();

@@ -6,6 +6,6 @@ const UsersController = require('../controllers/UsersController.js');
 // Define routes and their controller methods
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
-router.post('/users', UsersController.postUser);
+router.post('/users', UsersController.postNew);
 
 module.exports = router;
