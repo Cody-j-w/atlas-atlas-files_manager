@@ -1,12 +1,9 @@
-
-const redis = require("redis");
+const redis = require('redis');
 
 class RedisClient {
     constructor() {
-        this.connected = false;
         this.client = redis.createClient();
 
-        // Handle connection errors
         this.client.on('error', (err) => {
             console.log('Redis Client Error:', err);
         });
@@ -47,6 +44,7 @@ class RedisClient {
     async del(key) {
         return new Promise((resolve, reject) => {
             this.client.del(key, (err) => {
+
               if (err) {
                 return reject(err);
               }
@@ -56,6 +54,6 @@ class RedisClient {
     }
 }
 
+// Create and export an instance of RedisClient
 const redisClient = new RedisClient();
-
 module.exports = redisClient;

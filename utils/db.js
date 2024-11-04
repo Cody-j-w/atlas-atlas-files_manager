@@ -36,6 +36,7 @@ class DBClient {
     try {
       const collection = this.db.collection("users");
       const count = await collection.countDocuments();
+      return count;
     } catch (err) {
       throw err;
     }
@@ -58,6 +59,16 @@ class DBClient {
       return user;
     } catch (err) {
       throw err;
+    }
+  }
+
+  async createUser(user) {
+    try {
+      const userCollection = this.db.collection("users");
+      const result = await userCollection.insertOne(user);
+      return result;
+    } catch (err) {
+        throw err;
     }
   }
 }
