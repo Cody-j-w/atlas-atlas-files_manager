@@ -1,6 +1,6 @@
-const { v4: uuidv4 } = require('uuid');
-const DBClient = require('../utils/db');
-const redisClient = require('../utils/redis.js');
+const { v4: uuidv4 } = require("uuid");
+const dbClient = require("../utils/db");
+const redisClient = require("../utils/redis.js");
 
 class AuthController {
   static async getConnect(req, res) {
@@ -22,13 +22,24 @@ class AuthController {
     if (!email) {
       return res.status(401).json({ error: "User not found" });
     } else {
-        const token = uuidv4();
-        const redisKey = `auth_${token}`;
-        const user = await DBClient.findUser(email);
-        const userId = user._id;
-        console.log(user);
-        await redisClient.set(redisKey, userId.toString(), 86400);
-        res.status(200).json({ token });
+      const token = uuidv4();
+      const redisKey = `auth_${token}`;
+      const user = await dbClient.findUser(email);
+      const userId = user._id;
+      console.log(user);
+      await redisClient.set(redisKey, userId.toString(), 86400);
+      res.status(200).json({ token });
+    }
+  }
+
+  static async getDisconnect(req, res) {
+    const token = req.headers["x-token"];
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized" });
+    } else {
+      const redisKey = `auth_${token}`;
+      await redisClient.del(redisKey);
+      res.sendStatus(204);
     }
   }
 }

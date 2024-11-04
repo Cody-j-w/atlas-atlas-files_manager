@@ -1,4 +1,6 @@
+const { json } = require("express");
 const dbClient = require("../utils/db");
+const redisClient = require("../utils/redis");
 const sha1 = require("sha1");
 
 class UsersController {
@@ -30,6 +32,21 @@ class UsersController {
 
     // Return only the email and MongoDB-generated id with status 201
     return res.status(201).json({ id: result.insertedId, email });
+  }
+
+  static async getMe(req, res) {
+    const token = req.headers["x-token"];
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized" });
+    } else {
+      const redisKey = `auth_${token}`;
+      const userId = await redisClient.get(redisKey);
+      if (!userId) {
+        // If token is not found in Redis, respond with 401 Unauthorized
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      return res.json({ id: userId, email: email });
+    }
   }
 }
 
