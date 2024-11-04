@@ -36,6 +36,7 @@ class DBClient {
     try {
       const collection = this.db.collection("users");
       const count = await collection.countDocuments();
+      return count;
     } catch (err) {
       throw err;
     }
