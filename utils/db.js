@@ -50,6 +50,16 @@ class DBClient {
       throw err;
     }
   }
+
+  async findUser(email) {
+    try {
+      const userCollection = this.db.collection("users");
+      const user = await userCollection.findOne({ email });
+      return user;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 const dbClient = new DBClient();
