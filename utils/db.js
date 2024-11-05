@@ -90,6 +90,16 @@ class DBClient {
       throw err;
     }
   }
+
+  async createFile(file) {
+      try {
+        const fileCollection = this.db.collection("files");
+        const result = await fileCollection.insertOne(file);
+        return result;
+      } catch (err) {
+        throw err;
+      }
+  }
 }
 
 const dbClient = new DBClient();
