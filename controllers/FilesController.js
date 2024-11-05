@@ -1,4 +1,4 @@
-const { uuidV4 } = require('mongodb/lib/core/utils.js');
+const { v4: uuidv4 } = require("uuid");
 const dbClient = require('../utils/db.js');
 const redisClient = require('../utils/redis.js');
 const fs = require('fs');
@@ -14,11 +14,17 @@ if (!process.env.FOLDER_PATH || process.env.FOLDER_PATH === '') {
 class FilesController {
 
     static async postUpload(req, res) {
+        console.log(req.headers)
+        const tokenHeader = "auth_"+req.headers['x-token'];
+        console.log(`tokenHeader: ${tokenHeader}`);
+        const user = await redisClient.get(tokenHeader);
+        console.log(user);
         if (!req.body.name) {
             res.status(400).send('Missing name');
         }
         const type = req.body.type;
-        const typeValidation = false;
+        const data = req.body.data;
+        let typeValidation = false;
         if (type === 'folder' || type === 'file' || type === 'image') {
             typeValidation = true;
         }
@@ -29,7 +35,11 @@ class FilesController {
             res.status(400).send('Missing data');
         }
         let parentId = 0;
-        parentId = req.body.parentId;
+        console.log("request parentId: "+req.body.parentId);
+        if(req.body.parentId) {
+            parentId = req.body.parentId;
+        }
+        console.log(`parentId: ${parentId}`);
         if (parentId !== 0) {
             const files = dbClient.db.collection('files');
             const parent = await files.findOne({_id: parentId});
@@ -42,18 +52,34 @@ class FilesController {
             }
         }
         if (type !== 'folder') {
-            const fileName = new uuidV4();
-
-        } else {
+            const fileName = uuidv4();
             const newFile = {
-                userId: userId,
+                userId: user,
                 name: req.body.name,
                 type: req.body.type,
-                
+                isPublic: req.body.isPublic,
+                parentId: parentId,
+                localPath: `${folderPath}/${String(fileName)}`
             }
-            fs.mkdir(req.body.name, (err) => {
-
-            })
+            fs.writeFile(newFile.localPath, req.body.data, {encoding: 'base64'}, (err) => {
+                if (err) throw err;
+                console.log(`file ${newFile.name} saved to ${newFile.localPath}`);
+            });
+            await dbClient.createFile(newFile);
+            res.status(201).send(newFile);
+        } else {
+            const newFolder = {
+                userId: user,
+                name: req.body.name,
+                type: req.body.type,
+                isPublic: req.body.isPublic,
+                parentId: parentId
+            }
+            fs.mkdir(newFolder.name, (err) => {
+                if (err) throw err;
+                console.log(`folder ${newFolder.name} saved`);
+            });
+            await dbClient.createFile(newFolder);
         }
 
     }
