@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const { ObjectId } = require("mongodb");
 require("dotenv").config();
 
 console.log(process.env.CONNECTION_URI);
@@ -62,13 +63,31 @@ class DBClient {
     }
   }
 
+  async findEmail(userId) {
+    try {
+        const userCollection = this.db.collection("users");
+
+        // Convert userId to ObjectId if necessary
+        const query = { _id: ObjectId.isValid(userId) ? new ObjectId(userId) : userId };
+
+        // Find a user document by user ID, projecting only the email field
+        const user = await userCollection.findOne(
+            query,
+            { projection: { email: 1 } }
+        );
+        return user;
+    } catch (err) {
+        throw err;
+    }
+}
+
   async createUser(user) {
     try {
       const userCollection = this.db.collection("users");
       const result = await userCollection.insertOne(user);
       return result;
     } catch (err) {
-        throw err;
+      throw err;
     }
   }
 }
