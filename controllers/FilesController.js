@@ -80,6 +80,7 @@ class FilesController {
                 console.log(`folder ${newFolder.name} saved`);
             });
             await dbClient.createFile(newFolder);
+            res.status(200).send(newFolder);
         }
 
     }
