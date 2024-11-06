@@ -82,6 +82,25 @@ class FilesController {
             await dbClient.createFile(newFolder);
             res.status(200).send(newFolder);
         }
+    }
+
+    static async getShow(req, res) {
+        const tokenHeader = "auth_"+req.headers['x-token'];
+        console.log(`tokenHeader: ${tokenHeader}`);
+        const user = await redisClient.get(tokenHeader);
+        if (!user) {
+            res.status(401).send("Unauthorized");
+        }
+
+        const showFile = dbClient.db.findOne({userId: user, _id: req.body.id});
+        if (!showFile) {
+            res.status(404).send("Not found");
+        } else {
+            res.status(200).send(showFile);
+        }
+    }
+
+    static async getIndex(req, res) {
 
     }
 }
