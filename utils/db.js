@@ -104,7 +104,18 @@ class DBClient {
   async findFile(fileId) {
     try {
       const fileCollection = this.db.collection("files");
-      const result = await fileCollection.findOne({_id: fileId});
+      const result = await fileCollection.findOne({_id: ObjectId(fileId)});
+
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async findFileByUserId(fileId, userId) {
+    try {
+      const fileCollection = this.db.collection("files");
+      const result = await fileCollection.findOne({_id: ObjectId(fileId), userId: userId});
       return result;
     } catch (err) {
       throw err;

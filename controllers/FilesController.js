@@ -80,8 +80,7 @@ class FilesController {
                 if (err) throw err;
                 console.log(`folder ${newFolder.name} saved`);
             });
-            const addedFolder = await dbClient.createFile(newFolder);
-            console.log(addedFolder._id);
+            await dbClient.createFile(newFolder);
             res.status(200).send(newFolder);
         }
     }
@@ -93,8 +92,8 @@ class FilesController {
         if (!user) {
             res.status(401).send("Unauthorized");
         }
-
-        const showFile = dbClient.db.findOne({userId: user, _id: req.param.id});
+        console.log(user);
+        const showFile = await dbClient.findFileByUserId(req.params.id, user);
         if (!showFile) {
             res.status(404).send("Not found");
         } else {
@@ -115,9 +114,10 @@ class FilesController {
         const offset = pageSize * pageNumber;
         const files = dbClient.db.collection('files');
         const query = files.find({parentId: req.query.parentId}).sort({_id: 1}).skip(offset).limit(pageSize);
-        for (doc in query) {
+        for (const doc in query) {
             result.push(doc);
         }
+        res.status(200).send(result);
     }
 }
 
