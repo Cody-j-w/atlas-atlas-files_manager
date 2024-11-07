@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 const dbClient = require('../utils/db.js');
 const redisClient = require('../utils/redis.js');
 const fs = require('fs');
+const mime = require('mime-types');
 
 let folderPath = '';
 if (!process.env.FOLDER_PATH || process.env.FOLDER_PATH === '') {
@@ -121,6 +122,26 @@ class FilesController {
             console.log(`id: ${doc._id} - parentId: ${doc.parentId}`);
         }
         res.status(200).send(query);
+    }
+
+    static async getFile(req, res) {
+        const fileId = req.params.id;
+        const gotFile = dbClient.findFile(fileId);
+        if (!gotFile || !gotFile.isPublic) {
+            res.status(404).send("Not found");
+        }
+        if (gotFile.type === 'folder') {
+            res.status(400).send("A folder doesn't have content");
+        }
+        const contentType = mime.lookup(gotFile.name);
+        fs.readFile(gotFile.localPath, (err, data) => {
+            if (err) {
+                res.status(404).send("Not found");
+            }
+            
+        })
+
+        res.status(200).send("result");
     }
 }
 
