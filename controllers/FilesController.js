@@ -110,14 +110,18 @@ class FilesController {
         }
         let result = [];
         const pageSize = 20;
-        const pageNumber = req.query.page;
+        const pageNumber = 0;
+        if (req.query.page) {
+            pageNumber = req.query.page;
+        }
+        console.log("parentId: "+req.query.parentId)
         const offset = pageSize * pageNumber;
         const files = dbClient.db.collection('files');
-        const query = files.find({parentId: req.query.parentId}).sort({_id: 1}).skip(offset).limit(pageSize);
-        for (const doc in query) {
-            result.push(doc);
+        const query = await files.find({parentId: req.query.parentId}).sort({_id: 1}).skip(offset).limit(pageSize).toArray();
+        for (const doc of query) {
+            console.log(`id: ${doc._id} - parentId: ${doc.parentId}`);
         }
-        res.status(200).send(result);
+        res.status(200).send(query);
     }
 }
 
