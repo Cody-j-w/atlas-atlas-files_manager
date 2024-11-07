@@ -108,7 +108,6 @@ class FilesController {
         if (!user) {
             res.status(401).send("Unauthorized");
         }
-        let result = [];
         const pageSize = 20;
         const pageNumber = 0;
         if (req.query.page) {
