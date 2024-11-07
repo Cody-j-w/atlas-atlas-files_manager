@@ -35,20 +35,20 @@ class FilesController {
             res.status(400).send('Missing data');
         }
         let parentId = 0;
-        console.log("request parentId: "+req.body.parentId);
         if(req.body.parentId) {
             parentId = req.body.parentId;
         }
         console.log(`parentId: ${parentId}`);
         if (parentId !== 0) {
-            const files = dbClient.db.collection('files');
-            const parent = await files.findOne({_id: parentId});
+            const parent = await dbClient.findFile(parentId);
+            console.log("parent: "+parent)
             if (!parent) {
                 res.status(400).send('Parent not found');
             } else if (parent.type !== 'folder') {
                 res.status(400).send('Parent is not a folder');
             } else {
                 folderPath = parent.name;
+                console.log("Folder path: "+folderPath);
             }
         }
         if (type !== 'folder') {
@@ -65,7 +65,8 @@ class FilesController {
                 if (err) throw err;
                 console.log(`file ${newFile.name} saved to ${newFile.localPath}`);
             });
-            await dbClient.createFile(newFile);
+            const addedFile = await dbClient.createFile(newFile);
+            console.log(addedFile._id);
             res.status(201).send(newFile);
         } else {
             const newFolder = {
@@ -79,7 +80,8 @@ class FilesController {
                 if (err) throw err;
                 console.log(`folder ${newFolder.name} saved`);
             });
-            await dbClient.createFile(newFolder);
+            const addedFolder = await dbClient.createFile(newFolder);
+            console.log(addedFolder._id);
             res.status(200).send(newFolder);
         }
     }
@@ -92,7 +94,7 @@ class FilesController {
             res.status(401).send("Unauthorized");
         }
 
-        const showFile = dbClient.db.findOne({userId: user, _id: req.body.id});
+        const showFile = dbClient.db.findOne({userId: user, _id: req.param.id});
         if (!showFile) {
             res.status(404).send("Not found");
         } else {
@@ -101,7 +103,21 @@ class FilesController {
     }
 
     static async getIndex(req, res) {
-
+        const tokenHeader = "auth_"+req.headers['x-token'];
+        console.log(`tokenHeader: ${tokenHeader}`);
+        const user = await redisClient.get(tokenHeader);
+        if (!user) {
+            res.status(401).send("Unauthorized");
+        }
+        let result = [];
+        const pageSize = 20;
+        const pageNumber = req.query.page;
+        const offset = pageSize * pageNumber;
+        const files = dbClient.db.collection('files');
+        const query = files.find({parentId: req.query.parentId}).sort({_id: 1}).skip(offset).limit(pageSize);
+        for (doc in query) {
+            result.push(doc);
+        }
     }
 }
 

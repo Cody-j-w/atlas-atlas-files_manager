@@ -100,6 +100,16 @@ class DBClient {
         throw err;
       }
   }
+
+  async findFile(fileId) {
+    try {
+      const fileCollection = this.db.collection("files");
+      const result = await fileCollection.findOne({_id: fileId});
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 const dbClient = new DBClient();
