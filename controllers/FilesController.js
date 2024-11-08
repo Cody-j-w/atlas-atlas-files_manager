@@ -156,6 +156,31 @@ class FilesController {
       .findOne({ _id: ObjectId(fileId) });
     res.status(200).send(updatedFile);
   }
+
+  static async putUnpublish(req, res) {
+    const tokenHeader = "auth_" + req.headers["x-token"];
+    console.log(`tokenHeader: ${tokenHeader}`);
+    const user = await redisClient.get(tokenHeader);
+    if (!user) {
+      res.status(401).send("Unauthorized");
+    }
+    const fileId = req.params.id;
+
+    const updateDoc = {
+      $set: {
+        isPublic: "False",
+      },
+    };
+
+    await dbClient.db
+      .collection("files")
+      .updateOne({ _id: ObjectId(fileId) }, updateDoc);
+
+    const updatedFile = await dbClient.db
+      .collection("files")
+      .findOne({ _id: ObjectId(fileId) });
+    res.status(200).send(updatedFile);
+  }
 }
 
 module.exports = FilesController;
