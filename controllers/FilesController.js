@@ -4,11 +4,17 @@ const redisClient = require('../utils/redis.js');
 const fs = require('fs');
 const mime = require('mime-types');
 
+// set path to local storage - if path does not exist, create it.
 let folderPath = '';
 if (!process.env.FOLDER_PATH || process.env.FOLDER_PATH === '') {
     folderPath = '/tmp/files_manager';
 } else {
     folderPath = process.env.FOLDER_PATH;
+}
+if(!fs.existsSync(folderPath)) {
+    fs.mkdir(folderPath, () => {
+        console.log("creating storage directory");
+    });
 }
 
 
@@ -125,23 +131,28 @@ class FilesController {
     }
 
     static async getFile(req, res) {
+        // retrieve file data from storage based on provided params
         const fileId = req.params.id;
-        const gotFile = dbClient.findFile(fileId);
+        const gotFile = await dbClient.findFile(fileId);
         if (!gotFile || !gotFile.isPublic) {
             res.status(404).send("Not found");
         }
         if (gotFile.type === 'folder') {
             res.status(400).send("A folder doesn't have content");
         }
-        const contentType = mime.lookup(gotFile.name);
-        fs.readFile(gotFile.localPath, (err, data) => {
+        // store content type based on file name
+        const contentType = mime.contentType(gotFile.name);
+        // pull char set out of content type header to be used when opening the file
+        const charSet = contentType.split('=')[1];
+
+        // open file, send either data or error depending on if it was successful.
+        fs.readFile(gotFile.localPath, charSet, (err, data) => {
             if (err) {
                 res.status(404).send("Not found");
             }
-            
-        })
-
-        res.status(200).send("result");
+            res.set('Content-Type', contentType);
+            res.status(200).send(data);
+        });
     }
 }
 
