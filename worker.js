@@ -3,7 +3,7 @@ const imageThumbnail = require('image-thumbnail');
 const dbClient = require('./utils/db');
 const fs = require('fs');
 
-const fileQueue = new Queue('thumbnail processing');
+const fileQueue = new Queue('fileQueue');
 fileQueue.process(async (job, done) => {
     if (!job.data.userId) {
         throw new Error("Missing userId");

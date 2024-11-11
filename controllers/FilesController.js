@@ -3,6 +3,7 @@ const dbClient = require('../utils/db.js');
 const redisClient = require('../utils/redis.js');
 const fs = require('fs');
 const mime = require('mime-types');
+const Queue = require('bull');
 
 // set path to local storage - if path does not exist, create it.
 let folderPath = '';
@@ -45,6 +46,7 @@ class FilesController {
         if(req.body.parentId) {
             parentId = req.body.parentId;
         }
+        const fileQueue = new Queue('fileQueue');
         console.log(`parentId: ${parentId}`);
         if (parentId !== 0) {
             const parent = await dbClient.findFile(parentId);
@@ -72,8 +74,15 @@ class FilesController {
                 if (err) throw err;
                 console.log(`file ${newFile.name} saved to ${newFile.localPath}`);
             });
-            const addedFile = await dbClient.createFile(newFile);
-            console.log(addedFile._id);
+            await dbClient.createFile(newFile);
+            if (newFile.type === 'image') {
+                const queuedFile = await dbClient.findFileByPath(newFile.localPath);
+                await fileQueue.add({
+                    userId: user,
+                    fileId: queuedFile._id
+                });
+            }
+
             res.status(201).send(newFile);
         } else {
             const newFolder = {
