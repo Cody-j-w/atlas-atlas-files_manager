@@ -4,6 +4,7 @@ const dbClient = require('../utils/db.js');
 const redisClient = require('../utils/redis.js');
 const fs = require('fs');
 const mime = require('mime-types');
+const Queue = require('bull');
 
 // set path to local storage - if path does not exist, create it.
 let folderPath = '';
@@ -19,6 +20,7 @@ if(!fs.existsSync(folderPath)) {
 }
 
 class FilesController {
+
   static async postUpload(req, res) {
     console.log(req.headers);
     const tokenHeader = "auth_" + req.headers["x-token"];

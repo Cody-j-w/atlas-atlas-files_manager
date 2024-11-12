@@ -121,7 +121,20 @@ class DBClient {
       throw err;
     }
   }
+
+  async findFileByPath(filePath) {
+    try {
+      const fileCollection = this.db.collection("files");
+      const result = await fileCollection.findOne({localPath: filePath});
+
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
+
+
 
 const dbClient = new DBClient();
 
